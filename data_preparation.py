@@ -1,9 +1,44 @@
-
+# Importing all the necessary libraries
 import pandas as pd
+import os
+import json
 import re
+from collections import Counter
 
-# Load and clean the data
-# Assuming the original data is loaded into a DataFrame `df`
+import torch
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using device: {device}")
+if device.type == 'cuda':
+    print(f"GPU Name: {torch.cuda.get_device_name(0)}")
+
+
+
+# Folder containing the JSON files
+folder_path = "jobs"
+
+# List to store data
+data_list = []
+
+# Iterate over each JSON file in the extracted folder
+for file_name in os.listdir(folder_path):
+    if file_name.endswith('.json'):  # Check if it's a JSON file
+        file_path = os.path.join(folder_path, file_name)
+        try:
+            # Read the JSON file
+            with open(file_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+
+                df_temp = pd.DataFrame(data)
+                data_list.append(df_temp)
+        except Exception as e:
+            print(f"Error reading {file_name}: {e}")
+
+# Combine all DataFrames into one named df
+df = pd.concat(data_list, ignore_index=True)
+
+
+
 
 # Drop rows where 'HTML_Text' is None
 df = df.dropna(subset=['HTML_Text'])
